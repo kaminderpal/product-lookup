@@ -23,13 +23,18 @@ type Pagination = {
 export default function Home() {
   const [keyword, setKeyword] = useState("wireless headphones");
   const [activeKeyword, setActiveKeyword] = useState("wireless headphones");
-  const [loading, setLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isPaginating, setIsPaginating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
-  async function fetchProducts(page: number, searchKeyword = activeKeyword) {
-    setLoading(true);
+  async function fetchProducts(page: number, searchKeyword = activeKeyword, mode: "search" | "page" = "search") {
+    if (mode === "search") {
+      setIsSearching(true);
+    } else {
+      setIsPaginating(true);
+    }
     setError(null);
 
     try {
@@ -49,7 +54,11 @@ export default function Home() {
       setPagination(null);
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
-      setLoading(false);
+      if (mode === "search") {
+        setIsSearching(false);
+      } else {
+        setIsPaginating(false);
+      }
     }
   }
 
@@ -57,7 +66,7 @@ export default function Home() {
     event.preventDefault();
     const trimmedKeyword = keyword.trim();
     setActiveKeyword(trimmedKeyword);
-    await fetchProducts(1, trimmedKeyword);
+    await fetchProducts(1, trimmedKeyword, "search");
   }
 
   return (
@@ -77,17 +86,17 @@ export default function Home() {
           />
           <button
             type="submit"
-            disabled={loading || !keyword.trim()}
+            disabled={isSearching || !keyword.trim()}
             className="rounded-xl bg-slate-900 px-5 py-2.5 font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Searching..." : "Search"}
+            {isSearching ? "Searching..." : "Search"}
           </button>
         </form>
 
         {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
       </section>
 
-      {pagination ? (
+      {pagination && pagination.total > 20 ? (
         <section className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <p className="text-sm text-slate-600">
             Page {pagination.page} of {pagination.totalPages} • {pagination.total} products
@@ -95,16 +104,16 @@ export default function Home() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => fetchProducts(Math.max(1, pagination.page - 1))}
-              disabled={loading || !pagination.hasPrev}
+              onClick={() => fetchProducts(Math.max(1, pagination.page - 1), activeKeyword, "page")}
+              disabled={isSearching || isPaginating || !pagination.hasPrev}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
             <button
               type="button"
-              onClick={() => fetchProducts(pagination.page + 1)}
-              disabled={loading || !pagination.hasNext}
+              onClick={() => fetchProducts(pagination.page + 1, activeKeyword, "page")}
+              disabled={isSearching || isPaginating || !pagination.hasNext}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
