@@ -12,37 +12,37 @@ const MOCK_PRODUCTS: MockProductSeed[] = [
     id: "100001",
     title: "On-Ear Wireless Headphones with Noise Isolation",
     price: "$39.99",
-    imageUrl: "/mock-product.svg"
+    imageUrl: "https://picsum.photos/seed/headphones/600/600"
   },
   {
     id: "100002",
     title: "12-Cup Programmable Coffee Maker",
     price: "$24.88",
-    imageUrl: "/mock-product.svg"
+    imageUrl: "https://picsum.photos/seed/coffeemaker/600/600"
   },
   {
     id: "100003",
     title: "27-inch 4K UHD Monitor",
     price: "$219.00",
-    imageUrl: "/mock-product.svg"
+    imageUrl: "https://picsum.photos/seed/monitor/600/600"
   },
   {
     id: "100004",
     title: "Ergonomic Office Chair with Lumbar Support",
     price: "$129.99",
-    imageUrl: "/mock-product.svg"
+    imageUrl: "https://picsum.photos/seed/chair/600/600"
   },
   {
     id: "100005",
     title: "10-inch Android Tablet 64GB",
     price: "$149.00",
-    imageUrl: "/mock-product.svg"
+    imageUrl: "https://picsum.photos/seed/tablet/600/600"
   },
   {
     id: "100006",
     title: "Countertop Air Fryer, 6 Quart",
     price: "$59.99",
-    imageUrl: "/mock-product.svg"
+    imageUrl: "https://picsum.photos/seed/airfryer/600/600"
   }
 ];
 
