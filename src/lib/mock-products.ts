@@ -46,18 +46,56 @@ const MOCK_PRODUCTS: MockProductSeed[] = [
   }
 ];
 
-export function searchMockProducts(keyword: string, page = 1): WalmartItem[] {
+const EXTRA_PRODUCT_PREFIXES = [
+  "Premium",
+  "Portable",
+  "Smart",
+  "Ultra",
+  "Compact",
+  "Deluxe",
+  "Essential",
+  "Advanced",
+  "Modern",
+  "Pro"
+];
+
+const EXTRA_PRODUCT_TYPES = [
+  "Bluetooth Speaker",
+  "Gaming Keyboard",
+  "USB-C Hub",
+  "Robot Vacuum",
+  "Fitness Tracker",
+  "Desk Lamp",
+  "Webcam",
+  "Power Bank",
+  "Electric Kettle",
+  "Noise-Canceling Earbuds"
+];
+
+const EXTRA_MOCK_PRODUCTS: MockProductSeed[] = Array.from({ length: 100 }, (_, index) => {
+  const prefix = EXTRA_PRODUCT_PREFIXES[index % EXTRA_PRODUCT_PREFIXES.length];
+  const type = EXTRA_PRODUCT_TYPES[index % EXTRA_PRODUCT_TYPES.length];
+  const id = String(100007 + index);
+  const price = (19.99 + (index % 15) * 7.5).toFixed(2);
+
+  return {
+    id,
+    title: `${prefix} ${type} Model ${index + 1}`,
+    price: `$${price}`,
+    imageUrl: `https://picsum.photos/seed/mock-product-${id}/600/600`
+  };
+});
+
+const ALL_MOCK_PRODUCTS = [...MOCK_PRODUCTS, ...EXTRA_MOCK_PRODUCTS];
+
+export function searchMockProducts(keyword: string): WalmartItem[] {
   const normalizedKeyword = keyword.trim().toLowerCase();
-  const filtered =
+  const matches =
     normalizedKeyword.length === 0
-      ? MOCK_PRODUCTS
-      : MOCK_PRODUCTS.filter((product) => product.title.toLowerCase().includes(normalizedKeyword));
+      ? ALL_MOCK_PRODUCTS
+      : ALL_MOCK_PRODUCTS.filter((product) => product.title.toLowerCase().includes(normalizedKeyword));
 
-  const pageSize = 10;
-  const start = Math.max(0, (page - 1) * pageSize);
-  const pageItems = filtered.slice(start, start + pageSize);
-
-  return pageItems.map((item) => ({
+  return matches.map((item) => ({
     asin: item.id,
     title: item.title,
     imageUrl: item.imageUrl,

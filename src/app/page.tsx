@@ -11,19 +11,31 @@ type Product = {
   price?: string;
 };
 
+type Pagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
+
 export default function Home() {
   const [keyword, setKeyword] = useState("wireless headphones");
+  const [activeKeyword, setActiveKeyword] = useState("wireless headphones");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
 
-  async function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function fetchProducts(page: number, searchKeyword = activeKeyword) {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/products?keyword=${encodeURIComponent(keyword)}`);
+      const response = await fetch(
+        `/api/products?keyword=${encodeURIComponent(searchKeyword)}&page=${page}&limit=20`
+      );
       const payload = await response.json();
 
       if (!response.ok) {
@@ -31,12 +43,21 @@ export default function Home() {
       }
 
       setProducts(payload.products ?? []);
+      setPagination(payload.pagination ?? null);
     } catch (err) {
       setProducts([]);
+      setPagination(null);
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmedKeyword = keyword.trim();
+    setActiveKeyword(trimmedKeyword);
+    await fetchProducts(1, trimmedKeyword);
   }
 
   return (
@@ -51,7 +72,7 @@ export default function Home() {
           <input
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder="Search products..."
+            placeholder="Search products (e.g. premium, smart, ultra)..."
             className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none ring-blue-500 transition focus:ring"
           />
           <button
@@ -65,6 +86,32 @@ export default function Home() {
 
         {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
       </section>
+
+      {pagination ? (
+        <section className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+          <p className="text-sm text-slate-600">
+            Page {pagination.page} of {pagination.totalPages} • {pagination.total} products
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => fetchProducts(Math.max(1, pagination.page - 1))}
+              disabled={loading || !pagination.hasPrev}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => fetchProducts(pagination.page + 1)}
+              disabled={loading || !pagination.hasNext}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
