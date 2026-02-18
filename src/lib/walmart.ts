@@ -13,6 +13,7 @@ type SearchParams = {
 type WalmartItem = {
   asin: string;
   title: string;
+  description?: string;
   imageUrl?: string;
   detailPageUrl?: string;
   price?: string;
@@ -36,6 +37,7 @@ function parseItems(data: WalmartSearchResponse): WalmartItem[] {
   return items.map((item) => ({
     asin: item.itemId ?? crypto.randomUUID(),
     title: item.title ?? "Untitled",
+    description: item.description,
     imageUrl: item.images?.[0]?.url,
     detailPageUrl: item.itemId ? `https://www.walmart.com/ip/${item.itemId}` : undefined,
     price:

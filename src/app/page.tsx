@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
 
 type Product = {
   asin: string;
   title: string;
+  description?: string;
   imageUrl?: string;
   detailPageUrl?: string;
   price?: string;
@@ -21,6 +24,7 @@ type Pagination = {
 };
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [keyword, setKeyword] = useState("wireless headphones");
   const [activeKeyword, setActiveKeyword] = useState("wireless headphones");
   const [isSearching, setIsSearching] = useState(false);
@@ -68,6 +72,33 @@ export default function Home() {
     setActiveKeyword(trimmedKeyword);
     await fetchProducts(1, trimmedKeyword, "search");
   }
+
+  function getProductHref(product: Product): string {
+    const currentPage = pagination?.page ?? 1;
+    const returnTo = `/?keyword=${encodeURIComponent(activeKeyword)}&page=${currentPage}`;
+    const searchParams = new URLSearchParams({
+      title: product.title,
+      description: product.description ?? "",
+      price: product.price ?? "",
+      imageUrl: product.imageUrl ?? "",
+      detailPageUrl: product.detailPageUrl ?? "",
+      returnTo
+    });
+
+    return `/products/${encodeURIComponent(product.asin)}?${searchParams.toString()}`;
+  }
+
+  useEffect(() => {
+    const keywordFromUrl = searchParams.get("keyword")?.trim();
+    const pageFromUrl = Number(searchParams.get("page") ?? "1");
+
+    if (!keywordFromUrl) return;
+
+    setKeyword(keywordFromUrl);
+    setActiveKeyword(keywordFromUrl);
+    void fetchProducts(Number.isFinite(pageFromUrl) && pageFromUrl > 0 ? pageFromUrl : 1, keywordFromUrl, "search");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.toString()]);
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl p-6 md:p-10">
@@ -124,7 +155,11 @@ export default function Home() {
 
       <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
-          <article key={product.asin} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+          <Link
+            key={product.asin}
+            href={getProductHref(product)}
+            className="block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:ring-slate-400"
+          >
             {product.imageUrl ? (
               <Image
                 src={product.imageUrl}
@@ -141,18 +176,11 @@ export default function Home() {
 
             <h2 className="mt-3 line-clamp-2 text-sm font-semibold leading-6">{product.title}</h2>
             <p className="mt-2 text-sm text-slate-700">{product.price ?? "Price unavailable"}</p>
-
-            {product.detailPageUrl ? (
-              <a
-                href={product.detailPageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-block text-sm font-medium text-blue-700 hover:underline"
-              >
-                View on Walmart
-              </a>
-            ) : null}
-          </article>
+            <p className="mt-2 line-clamp-2 text-xs text-slate-500">
+              {product.description ?? "Tap to view product details."}
+            </p>
+            <p className="mt-3 text-sm font-medium text-blue-700">View details</p>
+          </Link>
         ))}
       </section>
     </main>

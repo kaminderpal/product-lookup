@@ -3,6 +3,7 @@ import type { WalmartItem } from "@/lib/walmart";
 type MockProductSeed = {
   id: string;
   title: string;
+  description: string;
   price: string;
   imageUrl: string;
 };
@@ -11,36 +12,42 @@ const MOCK_PRODUCTS: MockProductSeed[] = [
   {
     id: "100001",
     title: "On-Ear Wireless Headphones with Noise Isolation",
+    description: "Comfortable over-ear fit with Bluetooth pairing, foldable design, and long-lasting battery life.",
     price: "$39.99",
     imageUrl: "https://picsum.photos/seed/headphones/600/600"
   },
   {
     id: "100002",
     title: "12-Cup Programmable Coffee Maker",
+    description: "Brews up to 12 cups with programmable start time, pause-and-serve, and reusable filter basket.",
     price: "$24.88",
     imageUrl: "https://picsum.photos/seed/coffeemaker/600/600"
   },
   {
     id: "100003",
     title: "27-inch 4K UHD Monitor",
+    description: "Crisp 4K panel with slim bezels, HDMI connectivity, and vivid color profile for work and media.",
     price: "$219.00",
     imageUrl: "https://picsum.photos/seed/monitor/600/600"
   },
   {
     id: "100004",
     title: "Ergonomic Office Chair with Lumbar Support",
+    description: "Adjustable seat height and lumbar support with breathable cushioning for all-day comfort.",
     price: "$129.99",
     imageUrl: "https://picsum.photos/seed/chair/600/600"
   },
   {
     id: "100005",
     title: "10-inch Android Tablet 64GB",
+    description: "Portable Android tablet with 64GB storage, HD display, and fast Wi-Fi for streaming and browsing.",
     price: "$149.00",
     imageUrl: "https://picsum.photos/seed/tablet/600/600"
   },
   {
     id: "100006",
     title: "Countertop Air Fryer, 6 Quart",
+    description: "Large-capacity digital air fryer with preset modes for fries, chicken, vegetables, and more.",
     price: "$59.99",
     imageUrl: "https://picsum.photos/seed/airfryer/600/600"
   }
@@ -81,6 +88,7 @@ const EXTRA_MOCK_PRODUCTS: MockProductSeed[] = Array.from({ length: 100 }, (_, i
   return {
     id,
     title: `${prefix} ${type} Model ${index + 1}`,
+    description: `A ${prefix.toLowerCase()} ${type.toLowerCase()} designed for everyday use, reliable performance, and value-focused shopping.`,
     price: `$${price}`,
     imageUrl: `https://picsum.photos/seed/mock-product-${id}/600/600`
   };
@@ -98,6 +106,7 @@ export function searchMockProducts(keyword: string): WalmartItem[] {
   return matches.map((item) => ({
     asin: item.id,
     title: item.title,
+    description: item.description,
     imageUrl: item.imageUrl,
     detailPageUrl: `https://www.walmart.com/ip/${item.id}`,
     price: item.price
