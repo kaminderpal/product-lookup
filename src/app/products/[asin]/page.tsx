@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getSuggestedMockProducts } from "@/lib/mock-products";
 
 type ProductPageProps = {
   params: {
@@ -32,6 +33,13 @@ export default function ProductPage({ params, searchParams }: ProductPageProps) 
   const detailPageUrl = safeDecode(searchParams.detailPageUrl);
   const returnTo = safeDecode(searchParams.returnTo) || "/";
 
+  const suggestions = getSuggestedMockProducts({
+    title,
+    description,
+    excludeAsin: params.asin,
+    limit: 10
+  });
+
   return (
     <main className="mx-auto min-h-screen max-w-4xl p-6 md:p-10">
       <Link href={returnTo} className="mb-6 inline-block text-sm font-medium text-blue-700 hover:underline">
@@ -60,6 +68,33 @@ export default function ProductPage({ params, searchParams }: ProductPageProps) 
         <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-700">
           {description || "No description available for this product."}
         </p>
+
+        <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-700">You may also like</h2>
+        <div className="mt-3 -mx-1 flex gap-3 overflow-x-auto px-1 pb-2 snap-x snap-mandatory">
+          {suggestions.map((product) => (
+            <Link
+              key={product.asin}
+              href={`/products/${encodeURIComponent(product.asin)}?title=${encodeURIComponent(product.title)}&description=${encodeURIComponent(product.description ?? "")}&price=${encodeURIComponent(product.price ?? "")}&imageUrl=${encodeURIComponent(product.imageUrl ?? "")}&detailPageUrl=${encodeURIComponent(product.detailPageUrl ?? "")}&returnTo=${encodeURIComponent(returnTo)}`}
+              className="min-w-[220px] max-w-[220px] shrink-0 snap-start rounded-xl border border-slate-200 p-3 transition hover:border-slate-400"
+            >
+              {product.imageUrl ? (
+                <Image
+                  src={product.imageUrl}
+                  alt={product.title}
+                  width={220}
+                  height={220}
+                  className="h-36 w-full rounded-lg object-cover"
+                />
+              ) : (
+                <div className="flex h-36 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-500">
+                  No image
+                </div>
+              )}
+              <p className="mt-2 line-clamp-2 text-sm font-medium text-slate-800">{product.title}</p>
+              <p className="mt-1 text-sm text-slate-600">{product.price ?? "Price unavailable"}</p>
+            </Link>
+          ))}
+        </div>
 
         {detailPageUrl ? (
           <a
