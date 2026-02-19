@@ -38,18 +38,18 @@ export async function GET(request: NextRequest) {
   const limit = Number(request.nextUrl.searchParams.get("limit") ?? "20");
   const provider = request.nextUrl.searchParams.get("provider");
 
-  if (!keyword) {
-    return NextResponse.json({ error: "Missing keyword query parameter" }, { status: 400 });
-  }
-
   try {
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;
     const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(20, Math.floor(limit)) : 20;
-    const terms = parseSearchTerms(keyword);
     const shouldUseMock = provider === "mock" || (provider !== "walmart" && !hasWalmartCredentials());
+    const terms = keyword ? parseSearchTerms(keyword) : [];
+
+    if (!shouldUseMock && !keyword) {
+      return NextResponse.json({ error: "Missing keyword query parameter" }, { status: 400 });
+    }
 
     if (shouldUseMock) {
-      const batches = terms.map((term) => searchMockProducts(term));
+      const batches = terms.length > 0 ? terms.map((term) => searchMockProducts(term)) : [searchMockProducts("")];
       const merged = mergeProducts(batches);
       const products = paginateProducts(merged, safePage, safeLimit);
       const total = merged.length;

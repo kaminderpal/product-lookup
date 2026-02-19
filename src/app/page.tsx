@@ -25,15 +25,20 @@ type Pagination = {
 
 export default function Home() {
   const searchParams = useSearchParams();
-  const [keyword, setKeyword] = useState("wireless headphones");
-  const [activeKeyword, setActiveKeyword] = useState("wireless headphones");
+  const [keyword, setKeyword] = useState("");
+  const [activeKeyword, setActiveKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isPaginating, setIsPaginating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
-  async function fetchProducts(page: number, searchKeyword = activeKeyword, mode: "search" | "page" = "search") {
+  async function fetchProducts(
+    page: number,
+    searchKeyword = activeKeyword,
+    mode: "search" | "page" = "search",
+    forcedProvider?: "mock" | "walmart"
+  ) {
     if (mode === "search") {
       setIsSearching(true);
     } else {
@@ -42,9 +47,20 @@ export default function Home() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/products?keyword=${encodeURIComponent(searchKeyword)}&page=${page}&limit=20`
-      );
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: "20"
+      });
+
+      if (searchKeyword.trim()) {
+        query.set("keyword", searchKeyword.trim());
+      }
+
+      if (forcedProvider) {
+        query.set("provider", forcedProvider);
+      }
+
+      const response = await fetch(`/api/products?${query.toString()}`);
       const payload = await response.json();
 
       if (!response.ok) {
@@ -69,6 +85,10 @@ export default function Home() {
   async function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedKeyword = keyword.trim();
+    if (!trimmedKeyword) {
+      setError("Enter a keyword to search.");
+      return;
+    }
     setActiveKeyword(trimmedKeyword);
     await fetchProducts(1, trimmedKeyword, "search");
   }
@@ -92,7 +112,12 @@ export default function Home() {
     const keywordFromUrl = searchParams.get("keyword")?.trim();
     const pageFromUrl = Number(searchParams.get("page") ?? "1");
 
-    if (!keywordFromUrl) return;
+    if (!keywordFromUrl) {
+      setKeyword("");
+      setActiveKeyword("");
+      void fetchProducts(1, "", "search", "mock");
+      return;
+    }
 
     setKeyword(keywordFromUrl);
     setActiveKeyword(keywordFromUrl);
@@ -101,24 +126,19 @@ export default function Home() {
   }, [searchParams.toString()]);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl p-6 md:p-10">
-      <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <h1 className="text-3xl font-bold tracking-tight">Walmart Product Lookup</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Search products using Walmart API via a secure server route.
-        </p>
-
-        <form onSubmit={handleSearch} className="mt-5 flex flex-col gap-3 md:flex-row">
+    <main className="mx-auto min-h-screen max-w-6xl px-0 py-6 md:py-10">
+      <section className="overflow-hidden py-1 md:py-2">
+        <form onSubmit={handleSearch} className="flex flex-col gap-3 md:flex-row">
           <input
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             placeholder="Search products (e.g. premium, smart, ultra)..."
-            className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none ring-blue-500 transition focus:ring"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 outline-none ring-blue-500 transition focus:ring"
           />
           <button
             type="submit"
             disabled={isSearching || !keyword.trim()}
-            className="rounded-xl bg-slate-900 px-5 py-2.5 font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-slate-900 px-5 py-2.5 font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSearching ? "Searching..." : "Search"}
           </button>
@@ -158,28 +178,30 @@ export default function Home() {
           <Link
             key={product.asin}
             href={getProductHref(product)}
-            className="block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:ring-slate-400"
+            className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             {product.imageUrl ? (
-              <Image
-                src={product.imageUrl}
-                alt={product.title}
-                width={300}
-                height={300}
-                className="h-56 w-full rounded-lg object-contain"
-              />
+              <div className="rounded-xl bg-slate-50 p-3">
+                <Image
+                  src={product.imageUrl}
+                  alt={product.title}
+                  width={300}
+                  height={300}
+                  className="h-52 w-full rounded-lg object-contain transition group-hover:scale-[1.02]"
+                />
+              </div>
             ) : (
               <div className="flex h-56 items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-500">
                 No image
               </div>
             )}
 
-            <h2 className="mt-3 line-clamp-2 text-sm font-semibold leading-6">{product.title}</h2>
-            <p className="mt-2 text-sm text-slate-700">{product.price ?? "Price unavailable"}</p>
-            <p className="mt-2 line-clamp-2 text-xs text-slate-500">
+            <h2 className="mt-4 line-clamp-2 text-sm font-semibold leading-6 text-slate-900">{product.title}</h2>
+            <p className="mt-2 text-sm font-medium text-slate-800">{product.price ?? "Price unavailable"}</p>
+            <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">
               {product.description ?? "Tap to view product details."}
             </p>
-            <p className="mt-3 text-sm font-medium text-blue-700">View details</p>
+            <p className="mt-3 text-sm font-medium text-blue-700 transition group-hover:text-blue-800">View details</p>
           </Link>
         ))}
       </section>
