@@ -88,6 +88,9 @@ Validation rules:
 - Seed at least 100 mock products
 - Filter by keyword (case-insensitive)
 - Return app `Product` shape
+- Add a suggestion helper for product detail recommendations.
+- Suggestions must be relevant to the currently viewed product (use weighted scoring from title + description tokens and product-category matching, not random picks).
+- Exclude the currently viewed product from suggestions.
 
 ## UI Requirements
 ### Home page (`src/app/page.tsx`)
@@ -102,6 +105,9 @@ Validation rules:
 - Show image, title, asin, price, description
 - Back link to previous search URL
 - External button to Walmart detail page when present
+- Render a horizontal carousel (`overflow-x`) of suggested products directly under the description.
+- Suggested products must come from the relevance helper and be context-aware to the current product.
+- Each suggestion card should include image, title, and price, and link to that suggestion's detail page.
 
 ## Images
 Configure `next.config.ts` with remote image hosts:
