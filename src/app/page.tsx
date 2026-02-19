@@ -126,7 +126,7 @@ export default function Home() {
   }, [searchParams.toString()]);
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-0 py-6 md:py-10">
+    <main className="mx-auto min-h-screen max-w-6xl px-4 py-6 md:px-6 md:py-10 lg:px-0">
       <section className="overflow-hidden py-1 md:py-2">
         <form onSubmit={handleSearch} className="flex flex-col gap-3 md:flex-row">
           <input

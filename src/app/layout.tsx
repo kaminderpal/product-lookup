@@ -3,8 +3,8 @@ import { TopNav } from "@/components/layout/TopNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Walmart Product Lookup",
-  description: "Search Walmart products with Next.js + Tailwind CSS"
+  title: "Product Lookup",
+  description: "Search products with Next.js + Tailwind CSS"
 };
 
 export default function RootLayout({
