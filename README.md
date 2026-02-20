@@ -1,4 +1,5 @@
 # Walmart Product Lookup (Next.js + Tailwind CSS)
+[![CI](https://github.com/kaminderpal/product-lookup/actions/workflows/ci.yml/badge.svg)](https://github.com/kaminderpal/product-lookup/actions/workflows/ci.yml)
 
 This project is a Next.js app with Tailwind CSS that searches Walmart products via Walmart API endpoints.
 It uses the open-source `@whitebox-co/walmart-marketplace-api` SDK.
