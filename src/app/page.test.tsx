@@ -108,8 +108,10 @@ describe("Home page", () => {
       expect(global.fetch).toHaveBeenCalledWith("/api/products?page=1&limit=20&keyword=phone");
     });
 
-    expect(screen.getByDisplayValue("phone")).toBeInTheDocument();
-    expect(screen.getByText("Page 1 of 2 • 21 products")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("phone")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Page 1 of 2/)).toHaveTextContent("21 products");
+    });
   });
 
   it("shows validation error when searching with an empty keyword", async () => {
