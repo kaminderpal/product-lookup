@@ -35,8 +35,8 @@ export default function Home() {
 
   async function fetchProducts(
     page: number,
-    searchKeyword = activeKeyword,
-    mode: "search" | "page" = "search",
+    searchKeyword: string,
+    mode: "search" | "page",
     forcedProvider?: "mock" | "walmart"
   ) {
     if (mode === "search") {
