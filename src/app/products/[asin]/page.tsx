@@ -3,17 +3,17 @@ import Link from "next/link";
 import { getSuggestedMockProducts } from "@/lib/mock-products";
 
 type ProductPageProps = {
-  params: {
+  params: Promise<{
     asin: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     title?: string;
     description?: string;
     price?: string;
     imageUrl?: string;
     detailPageUrl?: string;
     returnTo?: string;
-  };
+  }>;
 };
 
 function safeDecode(value: string | undefined): string {
@@ -25,18 +25,21 @@ function safeDecode(value: string | undefined): string {
   }
 }
 
-export default function ProductPage({ params, searchParams }: ProductPageProps) {
-  const title = safeDecode(searchParams.title) || "Product";
-  const description = safeDecode(searchParams.description);
-  const price = safeDecode(searchParams.price);
-  const imageUrl = safeDecode(searchParams.imageUrl);
-  const detailPageUrl = safeDecode(searchParams.detailPageUrl);
-  const returnTo = safeDecode(searchParams.returnTo) || "/";
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const title = safeDecode(resolvedSearchParams.title) || "Product";
+  const description = safeDecode(resolvedSearchParams.description);
+  const price = safeDecode(resolvedSearchParams.price);
+  const imageUrl = safeDecode(resolvedSearchParams.imageUrl);
+  const detailPageUrl = safeDecode(resolvedSearchParams.detailPageUrl);
+  const returnTo = safeDecode(resolvedSearchParams.returnTo) || "/";
 
   const suggestions = getSuggestedMockProducts({
     title,
     description,
-    excludeAsin: params.asin,
+    excludeAsin: resolvedParams.asin,
     limit: 10
   });
 
@@ -60,7 +63,7 @@ export default function ProductPage({ params, searchParams }: ProductPageProps) 
         )}
 
         <h1 className="mt-6 text-2xl font-bold tracking-tight">{title}</h1>
-        <p className="mt-2 text-sm text-slate-500">ASIN/ID: {params.asin}</p>
+        <p className="mt-2 text-sm text-slate-500">ASIN/ID: {resolvedParams.asin}</p>
 
         <p className="mt-4 text-lg font-semibold text-slate-900">{price || "Price unavailable"}</p>
 

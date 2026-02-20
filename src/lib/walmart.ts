@@ -1,8 +1,7 @@
 import crypto from "node:crypto";
 import walmartMarketplaceApi, {
   ItemsApi,
-  defaultParams,
-  type InlineResponse2004Items
+  defaultParams
 } from "@whitebox-co/walmart-marketplace-api";
 
 type SearchParams = {
@@ -19,8 +18,16 @@ type WalmartItem = {
   price?: string;
 };
 
+type WalmartApiItem = {
+  itemId?: string;
+  title?: string;
+  description?: string;
+  images?: { url?: string }[];
+  price?: { amount?: number | string };
+};
+
 type WalmartSearchResponse = {
-  items?: InlineResponse2004Items[];
+  items?: WalmartApiItem[];
 };
 
 const serviceName = process.env.WALMART_SERVICE_NAME ?? "Walmart Marketplace";
@@ -50,11 +57,14 @@ function parseItems(data: WalmartSearchResponse): WalmartItem[] {
 async function getItemsApi(): Promise<ItemsApi> {
   const clientId = process.env.WALMART_CLIENT_ID?.trim();
   const clientSecret = process.env.WALMART_CLIENT_SECRET?.trim();
-  const missing: string[] = [];
-  if (!clientId) missing.push("WALMART_CLIENT_ID");
-  if (!clientSecret) missing.push("WALMART_CLIENT_SECRET");
-  if (missing.length > 0) {
-    throw new Error(`Missing Walmart credentials: ${missing.join(", ")}`);
+  if (!clientId || !clientSecret) {
+    const missing = [
+      !clientId ? "WALMART_CLIENT_ID" : null,
+      !clientSecret ? "WALMART_CLIENT_SECRET" : null
+    ]
+      .filter(Boolean)
+      .join(", ");
+    throw new Error(`Missing Walmart credentials: ${missing}`);
   }
 
   if (!itemsApiPromise) {

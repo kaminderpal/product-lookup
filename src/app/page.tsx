@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 
 type Product = {
   asin: string;
@@ -23,7 +23,7 @@ type Pagination = {
   hasPrev: boolean;
 };
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const [keyword, setKeyword] = useState("");
   const [activeKeyword, setActiveKeyword] = useState("");
@@ -206,5 +206,13 @@ export default function Home() {
         ))}
       </section>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<main className="mx-auto min-h-screen max-w-6xl px-4 py-6 md:px-6 md:py-10 lg:px-0" />}>
+      <HomeContent />
+    </Suspense>
   );
 }
