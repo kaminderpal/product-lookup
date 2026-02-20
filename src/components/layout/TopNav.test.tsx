@@ -3,10 +3,13 @@ import { TopNav } from "./TopNav";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({
-    priority: _priority,
-    ...props
-  }: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }) => <img alt="" {...props} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }) => {
+    // Remove Next.js-only prop before rendering as a plain img in tests.
+    const { priority, ...rest } = props;
+    void priority;
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img alt="" {...rest} />;
+  },
 }));
 
 describe("TopNav", () => {
